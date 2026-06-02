@@ -26,7 +26,7 @@ export default async function AdminDashboardPage() {
   // Calculate stats
   const totalLeads = leads?.length || 0;
   const awaitingReview = leads?.filter((l) => l.status === 'awaiting_review')?.length || 0;
-  const pdfReady = leads?.filter((l) => l.status === 'pdf_ready')?.length || 0;
+  const pdfReady = leads?.filter((l) => l.status === 'pdf_ready' || l.status === 'sent' || l.pdf_generated)?.length || 0;
   const emailsSent = leads?.filter((l) => l.status === 'sent' || l.pdf_sent)?.length || 0;
 
   return (
