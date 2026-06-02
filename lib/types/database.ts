@@ -155,10 +155,19 @@ export interface ActionableUpgrade {
   fix: string;
 }
 
+export interface AdminInsights {
+  pitch_website_dev: boolean;
+  pitch_seo: boolean;
+  pitch_social_management: boolean;
+  pitch_rebranding: boolean;
+  agency_upsell_strategy: string;
+}
+
 export interface ReportContent {
   scores: BrandScore;
   executive_summary: string;
   actionable_upgrades: ActionableUpgrade[];
+  admin_insights?: AdminInsights;
   brand_foundation?: BrandFoundation;
   competitors?: CompetitorLandscape;
   visual_identity?: VisualIdentityAudit;

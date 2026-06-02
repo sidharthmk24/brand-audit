@@ -90,13 +90,39 @@ export async function scrapeInstagramProfile(handle: string, leadId: string): Pr
   }
 
   const profile = items[0] as any;
-  const bio = profile.biography || '';
+  let bio = profile.biography || '';
   const follower_count = profile.followersCount || 0;
 
   // Extract up to 3 image URLs from the user's latest posts
   const recent_images_base64: string[] = [];
   const latestPosts = profile.latestPosts || [];
   let screenshot_url = '';
+
+  // Calculate System Posting Frequency
+  let frequencyData = '';
+  if (latestPosts.length > 1) {
+    const timestamps: number[] = [];
+    for (let i = 0; i < Math.min(15, latestPosts.length); i++) {
+      const ts = latestPosts[i].timestamp;
+      if (ts) {
+        const time = new Date(ts).getTime();
+        if (!isNaN(time)) timestamps.push(time);
+      }
+    }
+    
+    if (timestamps.length > 1) {
+      timestamps.sort((a, b) => b - a); // Newest first
+      const newest = timestamps[0];
+      const oldest = timestamps[timestamps.length - 1];
+      const daysElapsed = Math.max(1, (newest - oldest) / (1000 * 60 * 60 * 24));
+      const avgDays = daysElapsed / (timestamps.length - 1);
+      const daysSinceLast = Math.max(0, (Date.now() - newest) / (1000 * 60 * 60 * 24));
+      
+      frequencyData = `\n\n[System Calculated Posting Frequency]\nAnalyzed ${timestamps.length} recent posts.\nAverage time between posts: ${avgDays.toFixed(1)} days.\nMost recent post: ${daysSinceLast.toFixed(1)} days ago.`;
+    }
+  }
+  
+  bio += frequencyData;
 
   for (let i = 0; i < Math.min(3, latestPosts.length); i++) {
     const post = latestPosts[i];

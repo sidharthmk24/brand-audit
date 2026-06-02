@@ -177,6 +177,8 @@ export const INDUSTRY_OPTIONS = [
   'Food & Beverage',
   'Education & EdTech',
   'Travel & Hospitality',
+  'Automotive & Mobility',
+  'Conglomerate / Multi-Sector',
   'Marketing & Agency',
   'Entertainment & Media',
   'Non-Profit',

@@ -118,6 +118,26 @@ export default function ReportViewer({ lead, reportContent: r, rawData }: Report
         </div>
       </div>
 
+      {/* AGENCY UPSELL STRATEGY (INTERNAL ONLY) */}
+      {r.admin_insights && (
+        <div style={{ ...cardStyle, background: '#fdf4ff', border: '2px solid #e879f9', marginBottom: '32px' }}>
+          <h2 style={{ ...sansFont, fontSize: '18px', fontWeight: 800, color: '#86198f', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            ⚡ Agency Upsell Strategy
+          </h2>
+          
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
+            {r.admin_insights.pitch_website_dev && <Badge text="Pitch Web Development" color="red" />}
+            {r.admin_insights.pitch_seo && <Badge text="Pitch SEO Services" color="blue" />}
+            {r.admin_insights.pitch_social_management && <Badge text="Pitch Social Management" color="amber" />}
+            {r.admin_insights.pitch_rebranding && <Badge text="Pitch Rebranding" color="green" />}
+          </div>
+
+          <div style={{ background: '#fff', padding: '16px', borderRadius: '8px', fontSize: '16px', lineHeight: 1.6, color: '#4a044e', border: '1px solid #f0abfc' }}>
+            <strong>Recommendation:</strong> {r.admin_insights.agency_upsell_strategy}
+          </div>
+        </div>
+      )}
+
       {/* SECTION 1 - EXECUTIVE SUMMARY */}
       <h2 style={{ ...sansFont, fontSize: '18px', fontWeight: 700, margin: '32px 0 16px 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
         1. Executive Summary

@@ -31,7 +31,10 @@ async function runAuditPipeline(leadId: string) {
       throw new Error(`Failed to fetch lead ${leadId}: ${leadError?.message}`);
     }
 
-    await db.from('leads').update({ status: 'processing' }).eq('id', leadId);
+    await db.from('leads').update({ 
+      status: 'processing',
+      pipeline_step: 'scraping'
+    }).eq('id', leadId);
 
     // 1. SCRAPING
     let scrapedText = '';
@@ -78,6 +81,9 @@ async function runAuditPipeline(leadId: string) {
     }).eq('lead_id', leadId);
 
     // 2. AI ANALYSIS
+    await db.from('leads').update({ 
+      pipeline_step: 'analyzing'
+    }).eq('id', leadId);
     console.log(`[Pipeline ${leadId}] Step 2: Starting Gemini analysis`);
 
     // Retrieve latest lead details in case they submitted details while scraping was running
@@ -98,12 +104,18 @@ async function runAuditPipeline(leadId: string) {
     console.log(`[Pipeline ${leadId}] Step 2 complete — Gemini returned report`);
 
     // Save report content
+    await db.from('leads').update({ 
+      pipeline_step: 'generating'
+    }).eq('id', leadId);
     await db.from('audit_reports').update({
       report_content: reportContent as any,
     }).eq('lead_id', leadId);
 
     // Pipeline stops here — admin will trigger PDF generation and email sending manually
-    await db.from('leads').update({ status: 'awaiting_review' }).eq('id', leadId);
+    await db.from('leads').update({ 
+      status: 'awaiting_review',
+      pipeline_step: 'complete'
+    }).eq('id', leadId);
 
     console.log(`[Pipeline ${leadId}] Pipeline complete — status set to awaiting_review. Admin will generate PDF and send email.`);
 
@@ -171,6 +183,7 @@ export async function POST(request: Request) {
         identifier: cleanIdentifier,
         input_type,
         status: 'pending',
+        pipeline_step: 'pending',
         pdf_generated: false,
         pdf_sent: false,
       })

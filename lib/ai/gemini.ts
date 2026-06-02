@@ -101,6 +101,8 @@ Use the research summary from Call 1 as your primary source.
 Score the brand's TRUE market equity not scraped content quality.
 Every section must be specific, reference real findings, name real competitors.
 Never give generic advice — always cite specific evidence.
+
+CRITICAL RULE FOR SOCIAL MEDIA: Look for "[System Calculated Posting Frequency]" in the Social Media Copy. If the system calculated average time between posts is greater than 7 days, OR if the most recent post is older than 30 days, you MUST set admin_insights.pitch_social_management to true and specifically recommend social media marketing/management in the agency_upsell_strategy.
   `.trim();
 
   const call2Prompt = `
@@ -131,6 +133,17 @@ Output exactly in the requested JSON structure.
       executive_summary: {
         type: Type.STRING,
         description: '3-4 paragraph overview of the brand\'s current state. Cover what they do well, main gaps, top priorities. Brutally honest but constructive tone.'
+      },
+      admin_insights: {
+        type: Type.OBJECT,
+        properties: {
+          pitch_website_dev: { type: Type.BOOLEAN, description: 'True if website is missing, very outdated, or severely lacks visual/messaging quality.' },
+          pitch_seo: { type: Type.BOOLEAN, description: 'True if SEO is poor or they are invisible on search.' },
+          pitch_social_management: { type: Type.BOOLEAN, description: 'True if socials are dead, missing, or highly inconsistent.' },
+          pitch_rebranding: { type: Type.BOOLEAN, description: 'True if visual identity or logo is weak, inconsistent, or unprofessional.' },
+          agency_upsell_strategy: { type: Type.STRING, description: '1-2 sentence recommendation for the agency on what to pitch this lead based on their biggest weaknesses.' }
+        },
+        required: ['pitch_website_dev', 'pitch_seo', 'pitch_social_management', 'pitch_rebranding', 'agency_upsell_strategy']
       },
       brand_foundation: {
         type: Type.OBJECT,
@@ -306,7 +319,7 @@ Output exactly in the requested JSON structure.
       }
     },
     required: [
-      'scores', 'executive_summary', 'brand_foundation', 'competitors', 
+      'scores', 'executive_summary', 'admin_insights', 'brand_foundation', 'competitors', 
       'visual_identity', 'website_audit', 'social_media_audit', 'content_audit',
       'verbal_identity', 'audience_perception', 'key_findings', 
       'growth_opportunities', 'priority_action_plan'

@@ -200,6 +200,7 @@ export default function LeadsTable({ initialLeads }: { initialLeads: LeadWithRep
               <th>Type</th>
               <th>Status</th>
               <th>Date</th>
+              <th>Upsell Alerts</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -249,6 +250,28 @@ export default function LeadsTable({ initialLeads }: { initialLeads: LeadWithRep
                   {/* Date */}
                   <td className="cell-date">
                     {formatDate(lead.created_at)}
+                  </td>
+
+                  {/* Upsells */}
+                  <td>
+                    {hasReport && report?.report_content?.admin_insights ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
+                        {report.report_content.admin_insights.pitch_website_dev && (
+                          <span style={{ fontSize: '0.625rem', padding: '2px 6px', background: '#fee2e2', color: '#b91c1c', borderRadius: '4px', fontWeight: 600 }}>Pitch Web</span>
+                        )}
+                        {report.report_content.admin_insights.pitch_seo && (
+                          <span style={{ fontSize: '0.625rem', padding: '2px 6px', background: '#dbeafe', color: '#1d4ed8', borderRadius: '4px', fontWeight: 600 }}>Pitch SEO</span>
+                        )}
+                        {report.report_content.admin_insights.pitch_social_management && (
+                          <span style={{ fontSize: '0.625rem', padding: '2px 6px', background: '#fae8ff', color: '#a21caf', borderRadius: '4px', fontWeight: 600 }}>Pitch Social</span>
+                        )}
+                        {report.report_content.admin_insights.pitch_rebranding && (
+                          <span style={{ fontSize: '0.625rem', padding: '2px 6px', background: '#fef3c7', color: '#b45309', borderRadius: '4px', fontWeight: 600 }}>Pitch Branding</span>
+                        )}
+                      </div>
+                    ) : (
+                      <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>—</span>
+                    )}
                   </td>
 
                   {/* Actions */}
