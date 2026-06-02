@@ -1,10 +1,13 @@
 import { ApifyClient } from 'apify-client';
 import { scrapeWebsite } from './web';
+import { uploadScreenshot } from '@/lib/supabase/storage';
 
 export interface SocialScrapeResult {
   bio: string;
   follower_count: number;
   recent_images_base64: string[];
+  screenshot_url: string;
+  screenshot_fullpage_url: string;
   raw_data: Record<string, unknown>;
 }
 
@@ -19,7 +22,7 @@ export function detectSocialPlatform(urlOrHandle: string): 'instagram' | 'youtub
   return 'generic';
 }
 
-export async function scrapeSocialProfile(identifier: string): Promise<SocialScrapeResult> {
+export async function scrapeSocialProfile(identifier: string, leadId: string): Promise<SocialScrapeResult> {
   const platform = detectSocialPlatform(identifier);
   
   if (platform === 'instagram') {
@@ -34,7 +37,7 @@ export async function scrapeSocialProfile(identifier: string): Promise<SocialScr
     
     try {
       console.log(`[Social Scraper] Attempting Apify Instagram scrape for: ${handle}`);
-      return await scrapeInstagramProfile(handle);
+      return await scrapeInstagramProfile(handle, leadId);
     } catch (err) {
       console.warn(`[Social Scraper] Apify Instagram scrape failed. Falling back to Puppeteer.`, err);
     }
@@ -49,12 +52,14 @@ export async function scrapeSocialProfile(identifier: string): Promise<SocialScr
   }
 
   console.log(`[Social Scraper] Scraping ${platform} profile using Puppeteer fallback: ${targetUrl}`);
-  const result = await scrapeWebsite(targetUrl);
+  const result = await scrapeWebsite(targetUrl, leadId);
   
   return {
     bio: result.text_content,
     follower_count: 0,
     recent_images_base64: [result.screenshot_base64],
+    screenshot_url: result.screenshot_url,
+    screenshot_fullpage_url: result.screenshot_fullpage_url,
     raw_data: {
       platform,
       url: targetUrl,
@@ -63,7 +68,7 @@ export async function scrapeSocialProfile(identifier: string): Promise<SocialScr
   };
 }
 
-export async function scrapeInstagramProfile(handle: string): Promise<SocialScrapeResult> {
+export async function scrapeInstagramProfile(handle: string, leadId: string): Promise<SocialScrapeResult> {
   const apifyToken = process.env.APIFY_API_TOKEN;
   if (!apifyToken) {
     throw new Error('APIFY_API_TOKEN is not set in environment variables');
@@ -91,6 +96,7 @@ export async function scrapeInstagramProfile(handle: string): Promise<SocialScra
   // Extract up to 3 image URLs from the user's latest posts
   const recent_images_base64: string[] = [];
   const latestPosts = profile.latestPosts || [];
+  let screenshot_url = '';
 
   for (let i = 0; i < Math.min(3, latestPosts.length); i++) {
     const post = latestPosts[i];
@@ -103,7 +109,14 @@ export async function scrapeInstagramProfile(handle: string): Promise<SocialScra
           const buffer = Buffer.from(arrayBuffer);
           const base64 = buffer.toString('base64');
           const mimeType = response.headers.get('content-type') || 'image/jpeg';
-          recent_images_base64.push(`data:${mimeType};base64,${base64}`);
+          
+          const fullBase64 = `data:${mimeType};base64,${base64}`;
+          recent_images_base64.push(fullBase64);
+
+          // Use the first successfully fetched image as the screenshot_url in Supabase
+          if (!screenshot_url) {
+            screenshot_url = await uploadScreenshot(leadId, base64, 'above-fold');
+          }
         } else {
           console.warn(`[Social Scraper] Failed to fetch image ${imageUrl}: Status ${response.status}`);
         }
@@ -117,6 +130,8 @@ export async function scrapeInstagramProfile(handle: string): Promise<SocialScra
     bio,
     follower_count,
     recent_images_base64,
+    screenshot_url,
+    screenshot_fullpage_url: '', // Instagram doesn't really have a full page screenshot via API
     raw_data: profile,
   };
 }

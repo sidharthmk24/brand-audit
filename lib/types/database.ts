@@ -149,20 +149,27 @@ export interface PriorityAction {
   first_step: string;
 }
 
+export interface ActionableUpgrade {
+  category: string;
+  issue: string;
+  fix: string;
+}
+
 export interface ReportContent {
   scores: BrandScore;
   executive_summary: string;
-  brand_foundation: BrandFoundation;
-  competitors: CompetitorLandscape;
-  visual_identity: VisualIdentityAudit;
-  website_audit: WebsiteAudit;
-  social_media_audit: SocialMediaAudit;
-  content_audit: ContentAudit;
-  verbal_identity: VerbalIdentityAudit;
-  audience_perception: AudiencePerception;
-  key_findings: KeyFindingsSummary;
-  growth_opportunities: GrowthOpportunity[];
-  priority_action_plan: PriorityAction[];
+  actionable_upgrades: ActionableUpgrade[];
+  brand_foundation?: BrandFoundation;
+  competitors?: CompetitorLandscape;
+  visual_identity?: VisualIdentityAudit;
+  website_audit?: WebsiteAudit;
+  social_media_audit?: SocialMediaAudit;
+  content_audit?: ContentAudit;
+  verbal_identity?: VerbalIdentityAudit;
+  audience_perception?: AudiencePerception;
+  key_findings?: KeyFindingsSummary;
+  growth_opportunities?: GrowthOpportunity[];
+  priority_action_plan?: PriorityAction[];
 }
 
 // --- AUDIT_REPORTS Table ---
@@ -177,6 +184,10 @@ export interface AuditReport {
   report_content: ReportContent | null;
   /** URL of the generated PDF in Supabase Storage */
   pdf_url: string | null;
+  /** High res screenshot URL */
+  screenshot_url?: string | null;
+  /** High res full page screenshot URL */
+  screenshot_fullpage_url?: string | null;
   /** Pipeline stage where failure occurred */
   error_stage: string | null;
   /** Error message / stack trace */

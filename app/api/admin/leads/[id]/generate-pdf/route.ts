@@ -43,8 +43,8 @@ export async function POST(
 
     console.log(`[Admin PDF] Generating PDF for lead ${id}`);
 
-    // Generate PDF — pass brand_name through the lead object
-    const pdfBuffer = await generatePdfBuffer(lead as any, report.report_content as any);
+    // Generate PDF — pass brand_name through the lead object, and full report for screenshots
+    const pdfBuffer = await generatePdfBuffer(lead as any, report.report_content as any, report);
 
     console.log(`[Admin PDF] PDF generated (${pdfBuffer.length} bytes), uploading...`);
 

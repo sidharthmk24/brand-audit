@@ -27,7 +27,7 @@ function esc(v: string | number | null | undefined): string {
 }
 
 // ── Build the full report HTML ───────────────────────────────
-function buildReportHtml(lead: Lead, content: ReportContent): string {
+function buildReportHtml(lead: Lead, content: ReportContent, report: any): string {
   const score = content.scores?.overall || 0
   const dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
   const coverDataUri = loadAsset('cover-clean.png')
@@ -59,7 +59,7 @@ function buildReportHtml(lead: Lead, content: ReportContent): string {
   let compHtml = '';
   if (content.competitors) {
     (['regional', 'national', 'international'] as const).forEach(level => {
-      const c = content.competitors[level];
+      const c = content.competitors?.[level];
       if (!c) return;
       compHtml += `
         <div class="card" style="margin-bottom:15pt; break-inside:avoid;">
@@ -247,6 +247,14 @@ h1, h2, h3, h4, .sans { font-family: 'Inter', sans-serif; }
 
   <div class="section-block">
     <div class="sec-title">5. Website Audit</div>
+    ${report?.screenshot_url ? `
+    <div style="margin: 24pt 0; break-inside: avoid;">
+      <p style="font-size: 11pt; color: #6b7280; font-family:'Inter',sans-serif; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8pt; font-weight:700;">
+        Website Screenshot — Above the Fold
+      </p>
+      <img src="${esc(report.screenshot_url)}" style="width: 100%; border-radius: 8pt; border: 1px solid #e5e7eb; box-shadow: 0 2pt 8pt rgba(0,0,0,0.08);" alt="Website screenshot" />
+    </div>
+    ` : ''}
     ${simpleGrid([
       { title: 'First Impression', content: content.website_audit?.first_impression },
       { title: 'Messaging Clarity', content: content.website_audit?.messaging_clarity },
@@ -359,6 +367,16 @@ h1, h2, h3, h4, .sans { font-family: 'Inter', sans-serif; }
     ${priorityHtml}
   </div>
 
+  <!-- ── APPENDIX PAGE ── -->
+  ${report?.screenshot_fullpage_url ? `
+  <div class="section-block">
+    <div class="sec-title">Appendix: Full Page Screenshot</div>
+    <div style="margin: 24pt 0;">
+      <img src="${esc(report.screenshot_fullpage_url)}" style="width: 100%; border-radius: 8pt; border: 1px solid #e5e7eb; box-shadow: 0 2pt 8pt rgba(0,0,0,0.08);" alt="Full website screenshot" />
+    </div>
+  </div>
+  ` : ''}
+
   <!-- ── PITCH PAGE ── -->
   <div class="section-block">
     <div style="background:#111111; border-radius:14pt; padding:40pt 36pt; color:#fff; text-align:center; break-inside:avoid; font-family:'Inter',sans-serif;">
@@ -408,8 +426,8 @@ h1, h2, h3, h4, .sans { font-family: 'Inter', sans-serif; }
 </html>`
 }
 
-export async function generatePdfBuffer(lead: Lead, reportContent: ReportContent): Promise<Buffer> {
-  const html = buildReportHtml(lead, reportContent)
+export async function generatePdfBuffer(lead: Lead, reportContent: ReportContent, report: any): Promise<Buffer> {
+  const html = buildReportHtml(lead, reportContent, report)
 
   const headerHtml = `
     <style>

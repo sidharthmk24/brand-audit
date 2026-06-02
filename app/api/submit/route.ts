@@ -37,23 +37,29 @@ async function runAuditPipeline(leadId: string) {
     let scrapedText = '';
     let base64Images: string[] = [];
     let rawData: any = {};
+    let screenshot_url = '';
+    let screenshot_fullpage_url = '';
 
     console.log(`[Pipeline ${leadId}] Step 1: Starting scrape (type: ${lead.input_type})`);
 
     if (lead.input_type === 'website' && lead.identifier.startsWith('http')) {
       try {
-        const result = await scrapeWebsite(lead.identifier);
+        const result = await scrapeWebsite(lead.identifier, leadId);
         scrapedText = result.text_content;
         base64Images = [result.screenshot_base64];
+        screenshot_url = result.screenshot_url;
+        screenshot_fullpage_url = result.screenshot_fullpage_url;
         rawData = result.raw_data;
       } catch (e) {
         console.warn(`[Pipeline] Scrape failed or skipped:`, e);
       }
     } else if (lead.input_type === 'social' && (lead.identifier.startsWith('http') || lead.identifier.startsWith('@'))) {
       try {
-        const result = await scrapeSocialProfile(lead.identifier);
+        const result = await scrapeSocialProfile(lead.identifier, leadId);
         scrapedText = result.bio + (result.follower_count ? '\nFollowers: ' + result.follower_count : '');
         base64Images = result.recent_images_base64;
+        screenshot_url = result.screenshot_url;
+        screenshot_fullpage_url = result.screenshot_fullpage_url;
         rawData = result.raw_data;
       } catch (e) {
         console.warn(`[Pipeline] Scrape failed or skipped:`, e);
@@ -64,8 +70,12 @@ async function runAuditPipeline(leadId: string) {
 
     console.log(`[Pipeline ${leadId}] Step 1 complete — scraped ${scrapedText.length} chars, ${base64Images.length} image(s)`);
 
-    // Save Raw Data
-    await db.from('audit_reports').update({ raw_data: rawData }).eq('lead_id', leadId);
+    // Save Raw Data & Screenshot URLs
+    await db.from('audit_reports').update({ 
+      raw_data: rawData,
+      screenshot_url,
+      screenshot_fullpage_url
+    }).eq('lead_id', leadId);
 
     // 2. AI ANALYSIS
     console.log(`[Pipeline ${leadId}] Step 2: Starting Gemini analysis`);

@@ -419,8 +419,8 @@ export default function ReportViewer({ lead, reportContent: r, rawData }: Report
             </tr>
           </thead>
           <tbody>
-            {r.growth_opportunities?.map((g, i) => (
-              <tr key={i} style={{ borderBottom: i < r.growth_opportunities.length - 1 ? '1px solid #e5e7eb' : 'none' }}>
+            {r.growth_opportunities?.map((g, i, arr) => (
+              <tr key={i} style={{ borderBottom: i < arr.length - 1 ? '1px solid #e5e7eb' : 'none' }}>
                 <td style={{ padding: '16px' }}>
                   <div style={{ fontWeight: 600, color: '#111827', fontSize: '14px', marginBottom: '4px' }}>{g.opportunity}</div>
                   <div style={{ fontSize: '12px', color: '#6b7280', fontStyle: 'italic' }}>{g.why_now}</div>
@@ -477,7 +477,7 @@ export default function ReportViewer({ lead, reportContent: r, rawData }: Report
       </div>
 
       {/* SECTION 14 - RAW DATA */}
-      <div style={{ marginTop: '48px', paddingTop: '24px', borderTop: '1px dashed #d1d5db' }}>
+      {/* <div style={{ marginTop: '48px', paddingTop: '24px', borderTop: '1px dashed #d1d5db' }}>
         <button
           onClick={() => setShowRawData(!showRawData)}
           style={{ ...sansFont, display: 'flex', alignItems: 'center', gap: '8px', background: 'transparent', border: 'none', color: '#6b7280', fontSize: '14px', fontWeight: 600, cursor: 'pointer', padding: 0 }}
@@ -489,7 +489,7 @@ export default function ReportViewer({ lead, reportContent: r, rawData }: Report
             {JSON.stringify(rawData || {}, null, 2)}
           </pre>
         )}
-      </div>
+      </div> */}
 
     </div>
   );
