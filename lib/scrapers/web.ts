@@ -130,7 +130,28 @@ ${bodyText.join('\n')}
     await browser.close();
   }
 
-  const rawData = $('h1, h2, h3, p, span, a').text().replace(/\s+/g, ' ').trim();
+  const rawText = $('h1, h2, h3, p, span, a').text().replace(/\s+/g, ' ').trim();
+
+  // Extract social links
+  const socialLinks: string[] = [];
+  $('a').each((_, el) => {
+    const href = $(el).attr('href');
+    if (href) {
+      const lowerHref = href.toLowerCase();
+      if (
+        lowerHref.includes('instagram.com') ||
+        lowerHref.includes('twitter.com') ||
+        lowerHref.includes('x.com') ||
+        lowerHref.includes('facebook.com') ||
+        lowerHref.includes('linkedin.com') ||
+        lowerHref.includes('tiktok.com') ||
+        lowerHref.includes('youtube.com')
+      ) {
+        socialLinks.push(href);
+      }
+    }
+  });
+  const uniqueSocialLinks = Array.from(new Set(socialLinks));
 
   return {
     text_content,
@@ -143,7 +164,8 @@ ${bodyText.join('\n')}
       title: $('title').text(),
       heading_count: headings.length,
       paragraph_count: bodyText.length,
-      raw_text: rawData,
+      raw_text: rawText,
+      social_links: uniqueSocialLinks,
     },
   };
 }

@@ -96,6 +96,20 @@ export default function ReportViewer({ lead, reportContent: r, rawData }: Report
             <p style={{ ...sansFont, fontSize: '14px', color: '#6b7280' }}>
               Submitted: {lead?.created_at ? new Date(lead.created_at).toLocaleDateString() : 'N/A'} • Industry: {lead?.industry || 'Unknown'}
             </p>
+            {rawData?.social_links && rawData.social_links.length > 1 && (
+              <div style={{ marginTop: '16px', ...sansFont }}>
+                <label style={{ fontSize: '12px', fontWeight: 700, color: '#4b5563', marginRight: '12px', textTransform: 'uppercase' }}>Discovered Social Accounts:</label>
+                <select 
+                  onChange={(e) => { if(e.target.value) window.open(e.target.value, '_blank'); e.target.value = ''; }}
+                  style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '14px', cursor: 'pointer', background: '#fff', color: '#111827', outline: 'none', maxWidth: '300px' }}
+                >
+                  <option value="">Select an account to view...</option>
+                  {rawData.social_links.map((link: string, i: number) => (
+                    <option key={i} value={link}>{link.replace('https://', '').replace('http://', '').replace('www.', '')}</option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ ...sansFont, fontSize: '12px', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }}>Overall Score</div>

@@ -320,7 +320,7 @@ export default function OnboardingForm({ variant = 'hero' }: { variant?: 'hero' 
 
     if (isSearching) {
       displayText = AI_TEXTS[aiTextIndex];
-      displaySubtext = "Please wait while our AI locates your digital footprint...";
+      displaySubtext = "Usually takes 30-60 seconds.";
       animKey = `search-${aiTextIndex}`;
     } else {
       const currentStep = PIPELINE_STEPS[pipelineStep] || PIPELINE_STEPS.pending;
@@ -461,13 +461,13 @@ export default function OnboardingForm({ variant = 'hero' }: { variant?: 'hero' 
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -20 }}
               transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-              className="relative z-10 bg-white max-w-2xl w-full p-6 sm:p-8 shadow-2xl overflow-y-auto max-h-[95vh] rounded-3xl"
+              className="relative z-10 bg-white max-w-2xl w-full shadow-2xl flex flex-col overflow-hidden max-h-[95vh] rounded-3xl"
               onClick={(e) => e.stopPropagation()}
             >
               {!isAnalyzing && !isSearching && (
                 <button
                   type="button" onClick={handleAbandon}
-                  className="absolute top-5 right-5 text-gray-400 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-full transition-all cursor-pointer"
+                  className="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur-sm text-gray-400 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-full transition-all cursor-pointer shadow-sm"
                 >
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -475,7 +475,8 @@ export default function OnboardingForm({ variant = 'hero' }: { variant?: 'hero' 
                 </button>
               )}
 
-              {/* Rendering State Logic */}
+              <div className="overflow-y-auto flex-1 p-6 sm:p-8">
+                {/* Rendering State Logic */}
               {(isSearching || isAnalyzing) ? (
                 <AiAnimation />
               ) : modalStep === 'details' ? (
@@ -563,7 +564,7 @@ export default function OnboardingForm({ variant = 'hero' }: { variant?: 'hero' 
                       </div>
 
                       {/* Links Info */}
-                      <div>
+                      {/* <div>
                         <h4 className="text-sm font-bold text-gray-900 border-b pb-2 mb-3">Digital Footprint (Optional)</h4>
                         <p className="text-xs text-gray-500 mb-3">You can manually provide these or we will search for them in the next step.</p>
                         <div className="space-y-4 sm:flex sm:space-y-0 sm:gap-4">
@@ -584,7 +585,7 @@ export default function OnboardingForm({ variant = 'hero' }: { variant?: 'hero' 
                             />
                           </div>
                         </div>
-                      </div>
+                      </div> */}
                     </div>
 
                     {serverError && (
@@ -634,18 +635,41 @@ export default function OnboardingForm({ variant = 'hero' }: { variant?: 'hero' 
                         </a>
                         {brand.socialLinks && brand.socialLinks.length > 0 && (
                           <div className="flex gap-2 mt-3 flex-wrap justify-center max-w-[90%]">
-                            {brand.socialLinks.map((s, i) => (
-                              <a 
-                                key={i} 
-                                href={s.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                onClick={(e) => e.stopPropagation()}
-                                className="text-[10px] sm:text-xs font-semibold bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-900 border border-gray-200 hover:border-gray-300 px-3 py-1 rounded-lg uppercase tracking-wide transition-colors shadow-sm"
-                              >
-                                {s.platform}
-                              </a>
-                            ))}
+                            {(() => {
+                              const grouped: Record<string, string[]> = {};
+                              brand.socialLinks.forEach(s => {
+                                const p = s.platform.toUpperCase();
+                                if (!grouped[p]) grouped[p] = [];
+                                if (!grouped[p].includes(s.url)) grouped[p].push(s.url);
+                              });
+                              return Object.entries(grouped).map(([platform, urls], i) => (
+                                urls.length === 1 ? (
+                                  <a 
+                                    key={i} 
+                                    href={urls[0]}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-[10px] sm:text-xs font-semibold bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-900 border border-gray-200 hover:border-gray-300 px-3 py-1 rounded-lg uppercase tracking-wide transition-colors shadow-sm"
+                                  >
+                                    {platform}
+                                  </a>
+                                ) : (
+                                  <div key={i} className="relative inline-block" onClick={(e) => e.stopPropagation()}>
+                                    <select 
+                                      onChange={(e) => { if (e.target.value) window.open(e.target.value, '_blank'); e.target.value = ''; }}
+                                      className="text-[10px] sm:text-xs font-semibold bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-900 border border-gray-200 hover:border-gray-300 px-3 py-1 rounded-lg uppercase tracking-wide transition-colors shadow-sm appearance-none pr-7 cursor-pointer outline-none max-w-[130px] text-ellipsis"
+                                      style={{ backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="%234b5563" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 5 6 8 9 5"/></svg>')`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 6px center' }}
+                                    >
+                                      <option value="">{platform} ({urls.length})</option>
+                                      {urls.map((url, urlIdx) => (
+                                        <option key={urlIdx} value={url}>{url.replace('https://', '').replace('http://', '').replace('www.', '')}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                )
+                              ));
+                            })()}
                           </div>
                         )}
                         <div className={`absolute right-5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
@@ -732,7 +756,7 @@ export default function OnboardingForm({ variant = 'hero' }: { variant?: 'hero' 
                   </div>
                 </div>
               ) : null}
-
+              </div>
             </motion.div>
           </div>
         )}

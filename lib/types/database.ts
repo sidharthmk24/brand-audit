@@ -28,6 +28,7 @@ export interface Lead {
   identifier: string;
   input_type: InputType;
   status: LeadStatus;
+  pipeline_step: string;
   pdf_generated: boolean;
   pdf_sent: boolean;
 }

@@ -17,11 +17,15 @@ CREATE TABLE leads (
   email         TEXT NOT NULL,
   phone         TEXT,
   company_name  TEXT,
+  brand_name    TEXT,
   industry      TEXT,
   identifier    TEXT NOT NULL,
   input_type    TEXT NOT NULL CHECK (input_type IN ('website', 'social')),
   status        TEXT NOT NULL DEFAULT 'pending'
-                CHECK (status IN ('pending', 'processing', 'awaiting_review', 'sent', 'failed'))
+                CHECK (status IN ('pending', 'processing', 'awaiting_review', 'sent', 'failed')),
+  pipeline_step TEXT DEFAULT 'pending',
+  pdf_generated BOOLEAN DEFAULT false,
+  pdf_sent      BOOLEAN DEFAULT false
 );
 
 -- Performance indexes
